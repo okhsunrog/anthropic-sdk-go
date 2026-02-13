@@ -32,6 +32,7 @@ func ValueOf[T Constant[T]]() T {
 }
 
 type (
+	Adaptive                                string // Always "adaptive"
 	Any                                     string // Always "any"
 	APIError                                string // Always "api_error"
 	ApplicationPDF                          string // Always "application/pdf"
@@ -146,6 +147,7 @@ type (
 	WebSearchToolResultError                string // Always "web_search_tool_result_error"
 )
 
+func (c Adaptive) Default() Adaptive                       { return "adaptive" }
 func (c Any) Default() Any                                 { return "any" }
 func (c APIError) Default() APIError                       { return "api_error" }
 func (c ApplicationPDF) Default() ApplicationPDF           { return "application/pdf" }
@@ -297,6 +299,7 @@ func (c WebSearchToolResultError) Default() WebSearchToolResultError {
 	return "web_search_tool_result_error"
 }
 
+func (c Adaptive) MarshalJSON() ([]byte, error)                            { return marshalString(c) }
 func (c Any) MarshalJSON() ([]byte, error)                                 { return marshalString(c) }
 func (c APIError) MarshalJSON() ([]byte, error)                            { return marshalString(c) }
 func (c ApplicationPDF) MarshalJSON() ([]byte, error)                      { return marshalString(c) }

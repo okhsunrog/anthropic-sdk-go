@@ -3464,17 +3464,41 @@ func ThinkingConfigParamOfEnabled(budgetTokens int64) ThinkingConfigParamUnion {
 	return ThinkingConfigParamUnion{OfEnabled: &enabled}
 }
 
+// ThinkingConfigAdaptiveParam represents adaptive thinking configuration.
+// In adaptive mode, Claude dynamically decides when and how much to think
+// based on the complexity of each request.
+type ThinkingConfigAdaptiveParam struct {
+	// This field can be elided, and will marshal its zero value as "adaptive".
+	Type constant.Adaptive `json:"type,required"`
+	paramObj
+}
+
+func (r ThinkingConfigAdaptiveParam) MarshalJSON() (data []byte, err error) {
+	type shadow ThinkingConfigAdaptiveParam
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+
+func (r *ThinkingConfigAdaptiveParam) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func ThinkingConfigParamOfAdaptive() ThinkingConfigParamUnion {
+	var adaptive ThinkingConfigAdaptiveParam
+	return ThinkingConfigParamUnion{OfAdaptive: &adaptive}
+}
+
 // Only one field can be non-zero.
 //
 // Use [param.IsOmitted] to confirm if a field is set.
 type ThinkingConfigParamUnion struct {
 	OfEnabled  *ThinkingConfigEnabledParam  `json:",omitzero,inline"`
 	OfDisabled *ThinkingConfigDisabledParam `json:",omitzero,inline"`
+	OfAdaptive *ThinkingConfigAdaptiveParam `json:",omitzero,inline"`
 	paramUnion
 }
 
 func (u ThinkingConfigParamUnion) MarshalJSON() ([]byte, error) {
-	return param.MarshalUnion(u, u.OfEnabled, u.OfDisabled)
+	return param.MarshalUnion(u, u.OfEnabled, u.OfDisabled, u.OfAdaptive)
 }
 
 func (u *ThinkingConfigParamUnion) UnmarshalJSON(data []byte) error {
@@ -3486,6 +3510,8 @@ func (u *ThinkingConfigParamUnion) asAny() any {
 		return u.OfEnabled
 	} else if !param.IsOmitted(u.OfDisabled) {
 		return u.OfDisabled
+	} else if !param.IsOmitted(u.OfAdaptive) {
+		return u.OfAdaptive
 	}
 	return nil
 }
@@ -3503,6 +3529,8 @@ func (u ThinkingConfigParamUnion) GetType() *string {
 	if vt := u.OfEnabled; vt != nil {
 		return (*string)(&vt.Type)
 	} else if vt := u.OfDisabled; vt != nil {
+		return (*string)(&vt.Type)
+	} else if vt := u.OfAdaptive; vt != nil {
 		return (*string)(&vt.Type)
 	}
 	return nil
